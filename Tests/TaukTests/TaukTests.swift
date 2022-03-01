@@ -1,11 +1,10 @@
 import XCTest
 @testable import Tauk
 
-final class TaukTests: XCTestCase {
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        XCTAssertEqual(Tauk().text, "Hello, World!")
+final class TaukPackageTest: TaukXCTestCase {
+    
+    override func setUpWithError() throws {
+        taukSetUp(apiToken: "", projectId: "", appUnderTest: XCUIApplication.init())
     }
+    
 }
