@@ -7,8 +7,16 @@ public class TaukXCTestCase: XCTestCase {
     public var projectId: String?
     public var appUnderTest: XCUIApplication?
     private var testResult: TestResult?
-    public var userProvidedBundleIdentifier: String?
+    public var userProvidedBundleId: String?
     let consoleOutput = OutputListener()
+    
+    func taukSetUp(apiToken: String, projectId: String, appUnderTest: XCUIApplication, customTestName: String? = nil, bundleId: String? = nil) {
+        self.apiToken = apiToken
+        self.projectId = projectId
+        self.appUnderTest = appUnderTest
+        self.customTestName = customTestName
+        self.userProvidedBundleId = bundleId ?? Bundle.main.bundleIdentifier
+    }
     
     // TODO: Optimize the speed of this method
     func getViewSource() -> String? {
@@ -46,24 +54,35 @@ public class TaukXCTestCase: XCTestCase {
     }
     
     public override func setUpWithError() throws {
+        try super.setUpWithError()
+        
         // Create TestResult instance
         self.testResult = TestResult(testName: formatTestMethodName(rawNameString: self.name), filename: #file, initialTags: getDeviceInformation())
         
         // Handle if user has provided a Bundle ID
-        if var testResult = self.testResult, let userProvidedBundleIdentifier = self.userProvidedBundleIdentifier {
+        if var testResult = self.testResult, let userProvidedBundleId = self.userProvidedBundleId {
             if testResult.tags["bundleId"] == nil {
-                testResult.tags["bundleId"] = userProvidedBundleIdentifier
+                testResult.tags["bundleId"] = userProvidedBundleId
             }
         }
     }
     
     public override func tearDownWithError() throws {
-        if var testResult = self.testResult {
-            testResult.endTime = ProcessInfo.processInfo.systemUptime
-            print("TIME TAKEN: \(testResult.calcElapsedTimeMilliseconds()!)")
-            
-            testResult.screenshot = self.getScreenshot()
+        try super.tearDownWithError()
+//        if var testResult = self.testResult {
+//            testResult.endTime = ProcessInfo.processInfo.systemUptime
+//            print("TIME TAKEN: \(testResult.calcElapsedTimeMilliseconds()!)")
+//            
+//            testResult.screenshot = self.getScreenshot()
+//        }
+        guard var testResult = self.testResult else {
+            print("ERROR: A Test Result was not created.")
+            return
         }
+        
+        testResult.endTime = ProcessInfo.processInfo.systemUptime
+        print("TIME TAKEN: \(testResult.calcElapsedTimeMilliseconds()!)")
+        testResult.screenshot = self.getScreenshot()
         
         // Stop listening to STDOUT
         consoleOutput.closeConsolePipe()
