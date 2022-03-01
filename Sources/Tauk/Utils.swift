@@ -18,6 +18,50 @@ enum TestStatus: String {
     case undetermined
 }
 
+struct Error {
+    var type: String?
+    var message: String
+    var lineNumber: Int?
+    var invokedFunction: String
+    var codeExecuted: String?
+    
+    init(issue: XCTIssue, testMethodName: String) {
+        self.message = issue.compactDescription
+        self.lineNumber = issue.sourceCodeContext.location?.lineNumber
+        self.invokedFunction = testMethodName
+        self.type = getIssueType(issue: issue)
+        
+    }
+    
+    func getIssueType(issue: XCTIssue) -> String {
+        switch issue.type {
+        case .assertionFailure: return "Assertion Failure"
+        case .performanceRegression: return "Performance Regression"
+        case .system: return "Internal Failure"
+        case .thrownError: return "Error Thrown"
+        case .uncaughtException: return "Uncaught Exception"
+        case .unmatchedExpectedFailure: return "Unmatched Expected Failure"
+        @unknown default:
+            return "Issue"
+        }
+    }
+    
+    // TODO: Return Array of Strings and Code Executed Line
+    func getCodeContext(issue: XCTIssue) {
+        guard let sourceCodeFilePath = issue.sourceCodeContext.location?.fileURL else {
+            return
+        }
+        let fileReader = StreamingFileReader(path: sourceCodeFilePath)
+        var lineNumber = 1
+        while let line = fileReader.readLine() {
+            if lineNumber == issue.sourceCodeContext.location?.lineNumber {
+                print("Line Number: \(lineNumber) and Contents: \(line)")
+            }
+            lineNumber += 1
+        }
+    }
+}
+
 struct TestResult {
     var status: TestStatus?
     let name: String
@@ -244,6 +288,47 @@ func getViewHierarchy(app: XCUIApplication) -> String {
     return viewHierarchy.xml
 }
 
+class StreamingFileReader {
+    var fileHandle: FileHandle?
+    var buffer: Data
+    let bufferSize: Int = 1024
+    
+    // Using new line as the delimiter
+    let delimiter = "\n".data(using: .utf8)!
+    
+    init(path: URL) {
+        try? fileHandle = FileHandle(forReadingFrom: path)
+        buffer = Data(capacity: bufferSize)
+    }
+    
+    func readLine() -> String? {
+        var rangeOfDelimiter = buffer.range(of: delimiter)
+        
+        while rangeOfDelimiter == nil {
+            guard let chunk = fileHandle?.readData(ofLength: bufferSize) else { return nil }
+            
+            if chunk.count == 0 {
+                if buffer.count > 0 {
+                    defer { buffer.count = 0 }
+                    
+                    return String(data: buffer, encoding: .utf8)
+                }
+                
+                return nil
+            } else {
+                buffer.append(chunk)
+                rangeOfDelimiter = buffer.range(of: delimiter)
+            }
+        }
+        
+        let rangeOfLine = 0 ..< rangeOfDelimiter!.upperBound
+        let line = String(data: buffer.subdata(in: rangeOfLine), encoding: .utf8)
+        
+        buffer.removeSubrange(rangeOfLine)
+        
+        return line?.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
 
 // Source: https://bit.ly/3H3bj3B
 class OutputListener {
