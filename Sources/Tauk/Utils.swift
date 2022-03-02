@@ -18,12 +18,23 @@ enum TestStatus: String {
     case undetermined
 }
 
-struct Error {
+struct CodeLine {
+    var lineNumber: Int
+    var lineCode: String
+    
+    init(_ lineNumber: Int, _ lineCode: String) {
+        self.lineNumber = lineNumber
+        self.lineCode = lineCode
+    }
+}
+
+struct TaukError {
     var type: String?
     var message: String
     var lineNumber: Int?
     var invokedFunction: String
     var codeExecuted: String?
+    var codeContext: [CodeLine]?
     
     init(issue: XCTIssue, testMethodName: String) {
         self.message = issue.compactDescription
@@ -47,18 +58,44 @@ struct Error {
     }
     
     // TODO: Return Array of Strings and Code Executed Line
-    func getCodeContext(issue: XCTIssue) {
-        guard let sourceCodeFilePath = issue.sourceCodeContext.location?.fileURL else {
-            return
+    mutating func getCodeContext(issue: XCTIssue) -> [CodeLine]? {
+        guard let sourceCodeFilePath = issue.sourceCodeContext.location?.fileURL, let issueLineNumber = issue.sourceCodeContext.location?.lineNumber else {
+            return nil
         }
+        
+        var linesBeforeError: [CodeLine] = []
+        var lineAtError: CodeLine?
+        var linesAfterError: [CodeLine] = []
+        
         let fileReader = StreamingFileReader(path: sourceCodeFilePath)
-        var lineNumber = 1
+        var currentLineNumber = 1
         while let line = fileReader.readLine() {
-            if lineNumber == issue.sourceCodeContext.location?.lineNumber {
-                print("Line Number: \(lineNumber) and Contents: \(line)")
+            if currentLineNumber != issueLineNumber && lineAtError == nil {
+                if linesBeforeError.count == 9 {
+                    linesBeforeError.removeFirst(4)
+                    linesBeforeError.append(CodeLine(currentLineNumber, line))
+                } else {
+                    linesBeforeError.append(CodeLine(currentLineNumber, line))
+                }
             }
-            lineNumber += 1
+            
+            if currentLineNumber == issueLineNumber {
+                self.codeExecuted = line
+                lineAtError = CodeLine(currentLineNumber, line)
+            }
+            
+            if lineAtError != nil && currentLineNumber != issueLineNumber && linesAfterError.count < 10 {
+                linesAfterError.append(CodeLine(currentLineNumber, line))
+            }
+            
+            currentLineNumber += 1
         }
+        
+        guard let lineAtError = lineAtError else {
+            return nil
+        }
+        
+        return linesBeforeError + [lineAtError] + linesAfterError
     }
 }
 
