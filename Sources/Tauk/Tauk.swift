@@ -2,26 +2,28 @@ import Foundation
 import XCTest
 
 public class TaukXCTestCase: XCTestCase {
-    public var customTestName: String?
-    public var apiToken: String?
-    public var projectId: String?
-    public var appUnderTest: XCUIApplication?
+    private var customTestName: String?
+    private var apiToken: String?
+    private var projectId: String?
+    private var appUnderTest: XCUIApplication?
     private var testResult: TestResult?
-    public var userProvidedBundleId: String?
+    private var bundleId: String?
+    private var excluded: Bool = false
     let consoleOutput = OutputListener()
     
-    func taukSetUp(apiToken: String, projectId: String, appUnderTest: XCUIApplication, customTestName: String? = nil, bundleId: String? = nil) {
+    func taukSetUp(apiToken: String, projectId: String, appUnderTest: XCUIApplication, exclude: Bool = false, customTestName: String? = nil, userProvidedBundleId: String? = nil) {
         self.apiToken = apiToken
         self.projectId = projectId
         self.appUnderTest = appUnderTest
         self.customTestName = customTestName
-        self.userProvidedBundleId = bundleId ?? Bundle.main.bundleIdentifier
+        self.bundleId = userProvidedBundleId ?? Bundle.main.bundleIdentifier
+        self.excluded = exclude
     }
     
     // TODO: Optimize the speed of this method
     func getViewSource() -> String? {
         guard let app = self.appUnderTest else {
-            print("ERROR: appUnderTest not defined.")
+            print("WARNING: appUnderTest was not provided.")
             return nil
         }
         
@@ -30,22 +32,19 @@ public class TaukXCTestCase: XCTestCase {
     
     func getScreenshot() -> String? {
         guard let app = self.appUnderTest else {
-            print("ERROR: appUnderTest not defined.")
+            print("WARNING: appUnderTest was not provided.")
             return nil
         }
         
         return app.screenshot().pngRepresentation.base64EncodedString()
     }
     
-    // TODO: Implement logic to handle the issue that occurred during the test
     public override func record(_ issue: XCTIssue) {
-        print("ERROR OBSERVED!")
-        print("API TOKEN: \(self.apiToken!)")
-        print("PROJECT ID: \(self.projectId!)")
-        print("DEVICE: \(getDeviceInformation())")
+        self.testResult?.status = .failed
+        self.testResult?.error = TaukError(issue: issue, testMethodName: formatTestMethodName(rawNameString: self.name))
+        self.testResult?.screenshot = getScreenshot()
+        self.testResult?.viewSource = getViewSource()
         super.record(issue)
-        
-        // TODO: Get error object and source code lines
     }
     
     public override func setUp() {
@@ -55,34 +54,32 @@ public class TaukXCTestCase: XCTestCase {
     
     public override func setUpWithError() throws {
         try super.setUpWithError()
+        // Handle if user has provided a custom test name
+        let name = self.customTestName ?? formatTestMethodName(rawNameString: self.name)
         
         // Create TestResult instance
-        self.testResult = TestResult(testName: formatTestMethodName(rawNameString: self.name), filename: #file, initialTags: getDeviceInformation())
-        
-        // Handle if user has provided a Bundle ID
-        if var testResult = self.testResult, let userProvidedBundleId = self.userProvidedBundleId {
-            if testResult.tags["bundleId"] == nil {
-                testResult.tags["bundleId"] = userProvidedBundleId
-            }
-        }
+        self.testResult = TestResult(testName: name, filename: #file, deviceInfo: DeviceInfo(bundleId: self.bundleId))
     }
     
     public override func tearDownWithError() throws {
         try super.tearDownWithError()
-//        if var testResult = self.testResult {
-//            testResult.endTime = ProcessInfo.processInfo.systemUptime
-//            print("TIME TAKEN: \(testResult.calcElapsedTimeMilliseconds()!)")
-//            
-//            testResult.screenshot = self.getScreenshot()
-//        }
+        
         guard var testResult = self.testResult else {
-            print("ERROR: A Test Result was not created.")
+            print("WARNING: A Tauk Test Result was not created.")
             return
         }
         
         testResult.endTime = ProcessInfo.processInfo.systemUptime
-        print("TIME TAKEN: \(testResult.calcElapsedTimeMilliseconds()!)")
-        testResult.screenshot = self.getScreenshot()
+        
+        if testResult.screenshot == nil {
+            testResult.screenshot = getScreenshot()
+        }
+        
+        if self.excluded == true {
+            testResult.status = .excluded
+        } else if testResult.status != .failed {
+            testResult.status = .passed
+        }
         
         // Stop listening to STDOUT
         consoleOutput.closeConsolePipe()
