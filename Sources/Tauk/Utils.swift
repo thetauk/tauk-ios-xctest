@@ -144,7 +144,7 @@ func getElementName(_ element: XCUIElementSnapshot) -> String {
     case .timeline:
         return "\(baseName)Timeline"
     case .ratingIndicator:
-        return "\(baseName)rRatingIndicator"
+        return "\(baseName)RatingIndicator"
     case .valueIndicator:
         return "\(baseName)ValueIndicator"
     case .splitGroup:
