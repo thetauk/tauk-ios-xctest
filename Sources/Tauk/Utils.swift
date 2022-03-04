@@ -17,175 +17,176 @@ func formatTestMethodName(rawNameString: String) -> String {
 }
 
 func getElementName(_ element: XCUIElementSnapshot) -> String {
+    let baseName = "XCUIElementType"
     switch element.elementType {
     case .activityIndicator:
-        return "XCUIElementTypeActivityIndicator"
+        return "\(baseName)ActivityIndicator"
     case .other:
-        return "XCUIElementTypeOther"
+        return "\(baseName)Other"
     case .any:
-        return "XCUIElementTypeAny"
+        return "\(baseName)Any"
     case .application:
-        return "XCUIElementTypeApplication"
+        return "\(baseName)Application"
     case .group:
-        return "XCUIElementTypeGroup"
+        return "\(baseName)Group"
     case .window:
-        return "XCUIElementTypeWindow"
+        return "\(baseName)Window"
     case .sheet:
-        return "XCUIElementTypeSheet"
+        return "\(baseName)Sheet"
     case .drawer:
-        return "XCUIElementTypeDrawer"
+        return "\(baseName)Drawer"
     case .alert:
-        return "XCUIElementTypeAlert"
+        return "\(baseName)Alert"
     case .dialog:
-        return "XCUIElementTypeDialog"
+        return "\(baseName)Dialog"
     case .button:
-        return "XCUIElementTypeButton"
+        return "\(baseName)Button"
     case .radioButton:
-        return "XCUIElementTypeRadioButton"
+        return "\(baseName)RadioButton"
     case .radioGroup:
-        return "XCUIElementTypeRadioGroup"
+        return "\(baseName)RadioGroup"
     case .checkBox:
-        return "XCUIElementTypeCheckBox"
+        return "\(baseName)CheckBox"
     case .disclosureTriangle:
-        return "XCUIElementTypeDisclosureTriangle"
+        return "\(baseName)DisclosureTriangle"
     case .popUpButton:
-        return "XCUIElementTypePopupButton"
+        return "\(baseName)PopupButton"
     case .comboBox:
-        return "XCUIElementTypeComboBox"
+        return "\(baseName)ComboBox"
     case .menuButton:
-        return "XCUIElementTypeMenuButton"
+        return "\(baseName)MenuButton"
     case .toolbarButton:
-        return "XCUIElementTypeToolbarButton"
+        return "\(baseName)ToolbarButton"
     case .popover:
-        return "XCUIElementTypePopover"
+        return "\(baseName)Popover"
     case .keyboard:
-        return "XCUIElementTypeKeyboard"
+        return "\(baseName)Keyboard"
     case .key:
-        return "XCUIElementTypeKey"
+        return "\(baseName)Key"
     case .navigationBar:
-        return "XCUIElementTypeNavigationBar"
+        return "\(baseName)NavigationBar"
     case .tabBar:
-        return "XCUIElementTypeTabBar"
+        return "\(baseName)TabBar"
     case .tabGroup:
-        return "XCUIElementTypeTabGroup"
+        return "\(baseName)TabGroup"
     case .toolbar:
-        return "XCUIElementTypeToolbar"
+        return "\(baseName)Toolbar"
     case .statusBar:
-        return "XCUIElementTypeStatusBar"
+        return "\(baseName)StatusBar"
     case .table:
-        return "XCUIElementTypeTable"
+        return "\(baseName)Table"
     case .tableRow:
-        return "XCUIElementTypeTableRow"
+        return "\(baseName)TableRow"
     case .tableColumn:
-        return "XCUIElementTypeTableColumn"
+        return "\(baseName)TableColumn"
     case .outline:
-        return "XCUIElementTypeOutline"
+        return "\(baseName)Outline"
     case .outlineRow:
-        return "XCUIElementTypeOutlineRow"
+        return "\(baseName)OutlineRow"
     case .browser:
-        return "XCUIElementTypeBrowser"
+        return "\(baseName)Browser"
     case .collectionView:
-        return "XCUIElementTypeCollectionView"
+        return "\(baseName)CollectionView"
     case .slider:
-        return "XCUIElementTypeSlider"
+        return "\(baseName)Slider"
     case .pageIndicator:
-        return "XCUIElementTypePageIndicator"
+        return "\(baseName)PageIndicator"
     case .progressIndicator:
-        return "XCUIElementTypeProgressIndicator"
+        return "\(baseName)ProgressIndicator"
     case .segmentedControl:
-        return "XCUIElementTypeSegmentedControl"
+        return "\(baseName)SegmentedControl"
     case .picker:
-        return "XCUIElementTypePicker"
+        return "\(baseName)Picker"
     case .pickerWheel:
-        return "XCUIElementTypePickerWheel"
+        return "\(baseName)PickerWheel"
     case .switch:
-        return "XCUIElementTypeSwitch"
+        return "\(baseName)Switch"
     case .toggle:
-        return "XCUIElementTypeToggle"
+        return "\(baseName)Toggle"
     case .link:
-        return "XCUIElementTypeLink"
+        return "\(baseName)Link"
     case .image:
-        return "XCUIElementTypeImage"
+        return "\(baseName)Image"
     case .icon:
-        return "XCUIElementTypeIcon"
+        return "\(baseName)Icon"
     case .searchField:
-        return "XCUIElementTypeSearchField"
+        return "\(baseName)SearchField"
     case .scrollView:
-        return "XCUIElementTypeScrollView"
+        return "\(baseName)ScrollView"
     case .scrollBar:
-        return "XCUIElementTypeScrollBar"
+        return "\(baseName)ScrollBar"
     case .staticText:
-        return "XCUIElementTypeStaticText"
+        return "\(baseName)StaticText"
     case .textField:
-        return "XCUIElementTypeTextFiled"
+        return "\(baseName)TextFiled"
     case .secureTextField:
-        return "XCUIElementTypeSecureTextField"
+        return "\(baseName)SecureTextField"
     case .datePicker:
-        return "XCUIElementTypeDatePicker"
+        return "\(baseName)DatePicker"
     case .textView:
-        return "XCUIElementTypeTextView"
+        return "\(baseName)TextView"
     case .menu:
-        return "XCUIElementTypeMenu"
+        return "\(baseName)Menu"
     case .menuItem:
-        return "XCUIElementTypeMenuItem"
+        return "\(baseName)MenuItem"
     case .menuBar:
-        return "XCUIElementTypeMenuBar"
+        return "\(baseName)MenuBar"
     case .menuBarItem:
-        return "XCUIElementTypeMenuBarItem"
+        return "\(baseName)MenuBarItem"
     case .map:
-        return "XCUIElementTypeMap"
+        return "\(baseName)Map"
     case .webView:
-        return "XCUIElementTypeWebView"
+        return "\(baseName)WebView"
     case .incrementArrow:
-        return "XCUIElementTypeIncrementArrow"
+        return "\(baseName)IncrementArrow"
     case .decrementArrow:
-        return "XCUIElementTypeDecrementArrow"
+        return "\(baseName)DecrementArrow"
     case .timeline:
-        return "XCUIElementTypeTimeline"
+        return "\(baseName)Timeline"
     case .ratingIndicator:
-        return "XCUIElementTyperRatingIndicator"
+        return "\(baseName)rRatingIndicator"
     case .valueIndicator:
-        return "XCUIElementTypeValueIndicator"
+        return "\(baseName)ValueIndicator"
     case .splitGroup:
-        return "XCUIElementTypeSplitGroup"
+        return "\(baseName)SplitGroup"
     case .splitter:
-        return "XCUIElementTypeSplitter"
+        return "\(baseName)Splitter"
     case .relevanceIndicator:
-        return "XCUIElementTypeRelevanceIndicator"
+        return "\(baseName)RelevanceIndicator"
     case .colorWell:
-        return "XCUIElementTypeColorWell"
+        return "\(baseName)ColorWell"
     case .helpTag:
-        return "XCUIElementTypeHelpTag"
+        return "\(baseName)HelpTag"
     case .matte:
-        return "XCUIElementTypeMatte"
+        return "\(baseName)Matte"
     case .dockItem:
-        return "XCUIElementTypeDockItem"
+        return "\(baseName)DockItem"
     case .ruler:
-        return "XCUIElementTypeRuler"
+        return "\(baseName)Ruler"
     case .rulerMarker:
-        return "XCUIElementTypeRulerMarker"
+        return "\(baseName)RulerMarker"
     case .grid:
-        return "XCUIElementTypeGrid"
+        return "\(baseName)Grid"
     case .levelIndicator:
-        return "XCUIElementTypeLevelIndicator"
+        return "\(baseName)LevelIndicator"
     case .cell:
-        return "XCUIElementTypeCell"
+        return "\(baseName)Cell"
     case .layoutArea:
-        return "XCUIElementTypeLayoutArea"
+        return "\(baseName)LayoutArea"
     case .layoutItem:
-        return "XCUIElementTypeLayoutItem"
+        return "\(baseName)LayoutItem"
     case .handle:
-        return "XCUIElementTypeHandle"
+        return "\(baseName)Handle"
     case .stepper:
-        return "XCUIElementTypeStepper"
+        return "\(baseName)Stepper"
     case .tab:
-        return "XCUIElementTypeTab"
+        return "\(baseName)Tab"
     case .touchBar:
-        return "XCUIElementTypeTouchBar"
+        return "\(baseName)TouchBar"
     case .statusItem:
-        return "XCUIElementTypeStatusItem"
+        return "\(baseName)StatusItem"
     @unknown default:
-        return "XCUIElementTypeUnknown"
+        return "\(baseName)Unknown"
     }
 }
 
