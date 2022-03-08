@@ -215,7 +215,7 @@ func getElementAttributes(_ element: XCUIElementSnapshot) -> [String: String] {
 func getViewHierarchy(app: XCUIApplication) -> String {
     let xmlDoc = AEXMLDocument()
     guard let snapshot = try? app.snapshot() else {
-        print("Waring: No Snapshot available")
+        print("Warning: No App Snapshot available.")
         return xmlDoc.xml
     }
 
