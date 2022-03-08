@@ -3,33 +3,39 @@ import DeviceKit
 
 struct DeviceInfo: Codable {
     var deviceName: String
-    var isSimulator: Bool
-    var displaySize: Double
-    var hasRoundedDisplayCorners: Bool
+    var isSimulator: String
+    var displaySize: String
+    var hasRoundedDisplayCorners: String
     var orientation: String
-    var screenBrightness: Int
+    var screenBrightness: String
     var platformName: String?
     var platformVersion: String?
-    var displayPixelDensity: Int?
-    var batteryLevel: Int?
+    var displayPixelDensity: String?
+    var batteryLevel: String?
     var batteryState: String?
-    var lowPowerMode: Bool = false
+    var lowPowerMode: String = String(false)
     var bundleId: String?
     
     init(bundleId: String? = nil) {
         let device = Device.current
         
         self.deviceName = device.safeDescription
-        self.isSimulator = device.isSimulator
-        self.displaySize = device.diagonal
-        self.hasRoundedDisplayCorners = device.hasRoundedDisplayCorners
+        self.isSimulator = String(device.isSimulator)
+        self.displaySize = String(device.diagonal)
+        self.hasRoundedDisplayCorners = String(device.hasRoundedDisplayCorners)
         self.orientation = device.orientation == .portrait ? "portrait" : "landscape"
-        self.screenBrightness = device.screenBrightness
+        self.screenBrightness = String(device.screenBrightness)
         self.platformName = device.systemName
         self.platformVersion = device.systemVersion
-        self.displayPixelDensity = device.ppi
-        self.batteryLevel = device.batteryLevel
         self.bundleId = bundleId
+        
+        if let ppi = device.ppi {
+            self.displayPixelDensity = String(ppi)
+        }
+        
+        if let batLevel = device.batteryLevel {
+            self.batteryLevel = String(batLevel)
+        }
         
         if let batteryState = device.batteryState {
             switch batteryState {
@@ -42,7 +48,7 @@ struct DeviceInfo: Codable {
             }
             
             if batteryState.lowPowerMode {
-                self.lowPowerMode = true
+                self.lowPowerMode = String(true)
             }
         }
     }
