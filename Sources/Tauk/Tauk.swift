@@ -64,6 +64,16 @@ public class TaukXCTestCase: XCTestCase {
     public override func tearDownWithError() throws {
         try super.tearDownWithError()
         
+        guard let apiToken = self.apiToken else {
+            print("WARNING: No API Token provided.")
+            return
+        }
+        
+        guard let projectId = self.projectId else {
+            print("WARNING: No Project ID provided.")
+            return
+        }
+        
         guard var testResult = self.testResult else {
             print("WARNING: A Tauk Test Result was not created.")
             return
@@ -75,6 +85,10 @@ public class TaukXCTestCase: XCTestCase {
             testResult.screenshot = getScreenshot()
         }
         
+        if testResult.viewSource == nil {
+            testResult.viewSource = getViewSource()
+        }
+        
         if self.excluded == true {
             testResult.status = .excluded
         } else if testResult.status != .failed {
@@ -84,7 +98,14 @@ public class TaukXCTestCase: XCTestCase {
         // Stop listening to STDOUT
         consoleOutput.closeConsolePipe()
         
-        // TODO: Call upload() function
+        let finalResult = testResult
+        
+        // TODO: Add fallback if target is less than iOS 13
+        Task(priority: .background) {
+            try await upload(apiToken: apiToken, projectId: projectId, testResult: finalResult)
+        }
+        
+        
         
     }
 }
