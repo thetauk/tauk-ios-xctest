@@ -98,14 +98,30 @@ public class TaukXCTestCase: XCTestCase {
         // Stop listening to STDOUT
         consoleOutput.closeConsolePipe()
         
-        let finalResult = testResult
-        
-        // TODO: Add fallback if target is less than iOS 13
-        Task(priority: .background) {
-            try await upload(apiToken: apiToken, projectId: projectId, testResult: finalResult)
+        let dispatchGroup = DispatchGroup()
+        dispatchGroup.enter()
+        TaukUpload.upload(apiToken: apiToken, projectId: projectId, testResult: testResult) { result in
+            switch result {
+            case .success(_):
+                print("SUCCESS: Uploaded test result to Tauk")
+                dispatchGroup.leave()
+            case .failure(let error):
+                print("WARNING: Failed to upload test result with error: \(error)")
+                dispatchGroup.leave()
+            }
         }
+        _ = dispatchGroup.wait(timeout: .now() + 4.0)
         
-        
+//        let finalResult = testResult
+//
+//        // TODO: Add fallback if target is less than iOS 13
+//        if #available(iOS 15.0, *) {
+//            Task(priority: .background) {
+//                try await upload(apiToken: apiToken, projectId: projectId, testResult: finalResult)
+//            }
+//        } else {
+//            // old style upload
+//        }
         
     }
 }
