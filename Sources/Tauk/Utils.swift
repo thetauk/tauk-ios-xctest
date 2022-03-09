@@ -216,7 +216,7 @@ func getViewHierarchy(app: XCUIApplication) -> String {
     let xmlDoc = AEXMLDocument()
     guard let snapshot = try? app.snapshot() else {
         print("Warning: No App Snapshot available.")
-        return xmlDoc.xml
+        return xmlDoc.xmlCompact
     }
 
     let app = xmlDoc.addChild(name: getElementName(snapshot), attributes: getElementAttributes(snapshot))
@@ -233,7 +233,7 @@ func getViewHierarchy(app: XCUIApplication) -> String {
     }
 
     traverseElementTree(elementSnapshot: snapshot.children[0], xmlElement: app)
-    return xmlDoc.xml
+    return xmlDoc.xmlCompact
 }
 
 // Source: https://bit.ly/3H3bj3B
