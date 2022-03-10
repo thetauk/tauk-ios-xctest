@@ -16,7 +16,7 @@ struct DeviceInfo: Codable {
     var lowPowerMode: String = String(false)
     var bundleId: String?
     
-    init(bundleId: String? = nil) {
+    init(bundleId: String?) {
         let device = Device.current
         
         self.deviceName = device.safeDescription

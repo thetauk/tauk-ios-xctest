@@ -11,7 +11,10 @@ enum TestStatus: String {
 struct TestResult {
     var status: TestStatus = .undetermined
     let name: String
-    let filename: String
+    var callerFilePath: String = ""
+    var filename: String {
+        return URL(fileURLWithPath: callerFilePath).lastPathComponent
+    }
     var deviceInfo: DeviceInfo
     var screenshot: String?
     var viewSource: String?
@@ -25,9 +28,8 @@ struct TestResult {
     }
     var error: TaukError?
     
-    init(testName name: String, filePath: String, deviceInfo: DeviceInfo) {
+    init(testName name: String, deviceInfo: DeviceInfo) {
         self.name = name
-        self.filename = URL(fileURLWithPath: filePath).lastPathComponent
         self.deviceInfo = deviceInfo
         self.startTime = ProcessInfo.processInfo.systemUptime
     }

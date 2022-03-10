@@ -9,15 +9,17 @@ public class TaukXCTestCase: XCTestCase {
     private var testResult: TestResult?
     private var bundleId: String?
     private var excluded: Bool = false
+    private var callerFilePath: String = ""
     let consoleOutput = OutputListener()
     
-    func taukSetUp(apiToken: String, projectId: String, appUnderTest: XCUIApplication, exclude: Bool = false, customTestName: String? = nil, userProvidedBundleId: String? = nil) {
+    func taukSetUp(apiToken: String, projectId: String, appUnderTest: XCUIApplication, exclude: Bool = false, customTestName: String? = nil, userProvidedBundleId: String? = Bundle.main.bundleIdentifier, callerFilePath: String = #filePath) {
         self.apiToken = apiToken
         self.projectId = projectId
         self.appUnderTest = appUnderTest
         self.customTestName = customTestName
-        self.bundleId = userProvidedBundleId ?? Bundle.main.bundleIdentifier
         self.excluded = exclude
+        self.callerFilePath = callerFilePath
+        self.bundleId = userProvidedBundleId
     }
     
     // TODO: Optimize the speed of this method
@@ -58,7 +60,7 @@ public class TaukXCTestCase: XCTestCase {
         let name = self.customTestName ?? formatTestMethodName(rawNameString: self.name)
         
         // Create TestResult instance
-        self.testResult = TestResult(testName: name, filePath: #filePath, deviceInfo: DeviceInfo(bundleId: self.bundleId))
+        self.testResult = TestResult(testName: name, deviceInfo: DeviceInfo(bundleId: self.bundleId))
     }
     
     public override func tearDownWithError() throws {
@@ -80,6 +82,8 @@ public class TaukXCTestCase: XCTestCase {
         }
         
         testResult.endTime = ProcessInfo.processInfo.systemUptime
+        testResult.callerFilePath = self.callerFilePath
+        testResult.deviceInfo.bundleId = self.bundleId
         
         if testResult.screenshot == nil {
             testResult.screenshot = getScreenshot()
