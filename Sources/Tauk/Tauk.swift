@@ -58,7 +58,7 @@ public class TaukXCTestCase: XCTestCase {
         let name = self.customTestName ?? formatTestMethodName(rawNameString: self.name)
         
         // Create TestResult instance
-        self.testResult = TestResult(testName: name, filename: #file, deviceInfo: DeviceInfo(bundleId: self.bundleId))
+        self.testResult = TestResult(testName: name, filePath: #filePath, deviceInfo: DeviceInfo(bundleId: self.bundleId))
     }
     
     public override func tearDownWithError() throws {

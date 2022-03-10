@@ -25,9 +25,9 @@ struct TestResult {
     }
     var error: TaukError?
     
-    init(testName name: String, filename: String, deviceInfo: DeviceInfo) {
+    init(testName name: String, filePath: String, deviceInfo: DeviceInfo) {
         self.name = name
-        self.filename = filename
+        self.filename = URL(fileURLWithPath: filePath).lastPathComponent
         self.deviceInfo = deviceInfo
         self.startTime = ProcessInfo.processInfo.systemUptime
     }
