@@ -2,28 +2,32 @@ import Foundation
 import XCTest
 
 public class TaukXCTestCase: XCTestCase {
-    private var customTestName: String?
     private var apiToken: String?
     private var projectId: String?
     private var appUnderTest: XCUIApplication?
-    private var testResult: TestResult?
+    private var customTestName: String?
     private var bundleId: String?
+    private var testResult: TestResult?
     private var excluded: Bool = false
     private var callerFilePath: String = ""
-    let consoleOutput = OutputListener()
+    private var uploadTimeout: Double = 0.0
+    private let inputPipe = Pipe() // Pipe to consume the messages on STDOUT and STDERR
+    private let outputPipe = Pipe() // Pipe to output messages back to STDOUT
     
-    func taukSetUp(apiToken: String, projectId: String, appUnderTest: XCUIApplication, exclude: Bool = false, customTestName: String? = nil, userProvidedBundleId: String? = Bundle.main.bundleIdentifier, callerFilePath: String = #filePath) {
+    
+    public func taukSetUp(apiToken: String, projectId: String, appUnderTest: XCUIApplication, exclude: Bool? = false, uploadTimeoutMilliseconds: Double? = nil, customTestName: String? = nil, userProvidedBundleId: String? = Bundle.main.bundleIdentifier, callerFilePath: String = #filePath) {
         self.apiToken = apiToken
         self.projectId = projectId
         self.appUnderTest = appUnderTest
         self.customTestName = customTestName
-        self.excluded = exclude
+        self.excluded = exclude ?? false
+        self.uploadTimeout = uploadTimeoutMilliseconds ?? 4.0
         self.callerFilePath = callerFilePath
         self.bundleId = userProvidedBundleId
+        openConsolePipe()
     }
     
-    // TODO: Optimize the speed of this method
-    func getViewSource() -> String? {
+    private func getViewSource() -> String? {
         guard let app = self.appUnderTest else {
             print("WARNING: appUnderTest was not provided.")
             return nil
@@ -32,7 +36,7 @@ public class TaukXCTestCase: XCTestCase {
         return getViewHierarchy(app: app)
     }
     
-    func getScreenshot() -> String? {
+    private func getScreenshot() -> String? {
         guard let app = self.appUnderTest else {
             print("WARNING: appUnderTest was not provided.")
             return nil
@@ -47,11 +51,6 @@ public class TaukXCTestCase: XCTestCase {
         self.testResult?.screenshot = getScreenshot()
         self.testResult?.viewSource = getViewSource()
         super.record(issue)
-    }
-    
-    public override func setUp() {
-        // Start listening to STDOUT
-        consoleOutput.openConsolePipe()
     }
     
     public override func setUpWithError() throws {
@@ -99,9 +98,6 @@ public class TaukXCTestCase: XCTestCase {
             testResult.status = .passed
         }
         
-        // Stop listening to STDOUT
-        consoleOutput.closeConsolePipe()
-        
         let dispatchGroup = DispatchGroup()
         dispatchGroup.enter()
         TaukUpload.upload(apiToken: apiToken, projectId: projectId, testResult: testResult) { result in
@@ -114,18 +110,33 @@ public class TaukXCTestCase: XCTestCase {
                 dispatchGroup.leave()
             }
         }
-        _ = dispatchGroup.wait(timeout: .now() + 4.0)
+        _ = dispatchGroup.wait(timeout: .now() + self.uploadTimeout)
+    }
+    
+    private func openConsolePipe() {
+        let pipeReadHandler = inputPipe.fileHandleForReading
         
-//        let finalResult = testResult
-//
-//        // TODO: Add fallback if target is less than iOS 13
-//        if #available(iOS 15.0, *) {
-//            Task(priority: .background) {
-//                try await upload(apiToken: apiToken, projectId: projectId, testResult: finalResult)
-//            }
-//        } else {
-//            // old style upload
-//        }
+        // Copy the STDOUT file descriptor into outputPipe's file descriptor to send it back on the Xcode Console
+        dup2(STDOUT_FILENO, outputPipe.fileHandleForWriting.fileDescriptor)
         
+        // Copy the inputPipe's file descriptor into the STDOUT and STDERR file descriptors
+        dup2(inputPipe.fileHandleForWriting.fileDescriptor, STDOUT_FILENO)
+        dup2(inputPipe.fileHandleForWriting.fileDescriptor, STDERR_FILENO)
+        
+        // Listen to when the file handler reads data notification
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handlePipeNotification), name: FileHandle.readCompletionNotification, object: pipeReadHandler)
+        
+        // Notify of any data read coming across the pipe
+        pipeReadHandler.readInBackgroundAndNotify()
+    }
+    
+    @objc private func handlePipeNotification(notification: Notification) {
+        inputPipe.fileHandleForReading.readInBackgroundAndNotify()
+        
+        if let data = notification.userInfo?[NSFileHandleNotificationDataItem] as? Data, let logLine = String(data: data, encoding: String.Encoding.ascii) {
+            outputPipe.fileHandleForWriting.write(data)
+            
+            // Store logLine in Queue
+        }
     }
 }
