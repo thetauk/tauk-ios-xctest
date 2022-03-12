@@ -16,7 +16,7 @@ open class TaukXCTestCase: XCTestCase {
     private var logQueue: [LogEntry] = []
     
     
-    public func taukSetUp(apiToken: String, projectId: String, appUnderTest: XCUIApplication, exclude: Bool? = false, uploadTimeoutMilliseconds: Double? = nil, customTestName: String? = nil, userProvidedBundleId: String? = Bundle.main.bundleIdentifier, callerFilePath: String = #filePath) {
+    open func taukSetUp(apiToken: String, projectId: String, appUnderTest: XCUIApplication, exclude: Bool? = false, uploadTimeoutMilliseconds: Double? = nil, customTestName: String? = nil, userProvidedBundleId: String? = Bundle.main.bundleIdentifier, callerFilePath: String = #filePath) {
         self.apiToken = apiToken
         self.projectId = projectId
         self.appUnderTest = appUnderTest
@@ -55,7 +55,7 @@ open class TaukXCTestCase: XCTestCase {
         }
     }
     
-    public override func record(_ issue: XCTIssue) {
+    open override func record(_ issue: XCTIssue) {
         self.testResult?.status = .failed
         self.testResult?.error = TaukError(issue: issue, testMethodName: formatTestMethodName(rawNameString: self.name))
         self.testResult?.log = getLogEntries()
@@ -64,7 +64,7 @@ open class TaukXCTestCase: XCTestCase {
         super.record(issue)
     }
     
-    public override func setUpWithError() throws {
+    open override func setUpWithError() throws {
         try super.setUpWithError()
         // Handle if user has provided a custom test name
         let name = self.customTestName ?? formatTestMethodName(rawNameString: self.name)
@@ -73,7 +73,7 @@ open class TaukXCTestCase: XCTestCase {
         self.testResult = TestResult(testName: name, deviceInfo: DeviceInfo(bundleId: self.bundleId))
     }
     
-    public override func tearDownWithError() throws {
+    open override func tearDownWithError() throws {
         try super.tearDownWithError()
         
         guard let apiToken = self.apiToken else {
