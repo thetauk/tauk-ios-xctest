@@ -68,7 +68,7 @@ struct TaukUpload {
         var platform: String?
         var platformVersion: String?
         var elapsedTimeMs: Int?
-        // TODO: add log
+        var log: [LogEntry]?
 
         init(from testResult: TestResult) {
             self.testStatus = testResult.status.rawValue
@@ -82,6 +82,7 @@ struct TaukUpload {
             self.platform = testResult.deviceInfo.platformName
             self.platformVersion = testResult.deviceInfo.platformVersion
             self.elapsedTimeMs = testResult.elapsedTimeMilliseconds
+            self.log = testResult.log
         }
 
         enum CodingKeys: String, CodingKey {
@@ -91,6 +92,7 @@ struct TaukUpload {
             case tags = "tags"
             case screenshot = "screenshot"
             case view = "view"
+            case log = "log"
             case error = "error"
             case codeContext = "code_context"
             case automationType = "automation_type"
@@ -179,41 +181,3 @@ struct TaukUpload {
         }.resume()
     }
 }
-
-//@available(iOS 15.0, *)
-//func upload(apiToken: String, projectId: String, testResult: TestResult) async throws {
-//    let endpoint = UploadEndpoint(apiToken: apiToken, projectId: projectId)
-//    guard let url = URL(string: "\(endpoint.baseURL)\(endpoint.path)") else {
-//        print("WARNING: \(RequestError.invalidURL.message) for upload.")
-//        return
-//    }
-//
-//    let payload = try? JSONEncoder().encode(UploadPayload(from: testResult))
-//
-//    do {
-//        var request = URLRequest(url: url)
-//        request.httpMethod = endpoint.method.rawValue
-//        request.allHTTPHeaderFields = endpoint.header
-//        request.httpBody = payload
-//        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-//        request.addValue("application/json", forHTTPHeaderField: "Accept")
-//
-//        // TODO: Create fallback non async/await URLSession if target is less than iOS 15
-//        let (_, response) = try await URLSession.shared.data(for: request, delegate: nil)
-//        guard let response = response as? HTTPURLResponse else {
-//            print("WARNING: \(RequestError.noResponse.message)")
-//            return
-//        }
-//
-//        switch response.statusCode {
-//        case 400:
-//            print("WARNING: \(RequestError.badRequest.message)")
-//        case 401:
-//            print("WARNING: \(RequestError.unauthorized.message).")
-//        default:
-//            print("WARNING: \(RequestError.unexpectedStatusCode.message).")
-//        }
-//    } catch {
-//        print("WARNING: \(RequestError.unknown.message).")
-//    }
-//}

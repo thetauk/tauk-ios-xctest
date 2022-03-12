@@ -13,6 +13,7 @@ public class TaukXCTestCase: XCTestCase {
     private var uploadTimeout: Double = 0.0
     private let inputPipe = Pipe() // Pipe to consume the messages on STDOUT and STDERR
     private let outputPipe = Pipe() // Pipe to output messages back to STDOUT
+    private var logQueue: [LogEntry] = []
     
     
     public func taukSetUp(apiToken: String, projectId: String, appUnderTest: XCUIApplication, exclude: Bool? = false, uploadTimeoutMilliseconds: Double? = nil, customTestName: String? = nil, userProvidedBundleId: String? = Bundle.main.bundleIdentifier, callerFilePath: String = #filePath) {
@@ -45,9 +46,19 @@ public class TaukXCTestCase: XCTestCase {
         return app.screenshot().pngRepresentation.base64EncodedString()
     }
     
+    private func getLogEntries() -> [LogEntry] {
+        // Return last 50 log entries
+        if self.logQueue.count > 50 {
+            return Array(self.logQueue[self.logQueue.count - 51 ... self.logQueue.count - 1])
+        } else {
+            return self.logQueue
+        }
+    }
+    
     public override func record(_ issue: XCTIssue) {
         self.testResult?.status = .failed
         self.testResult?.error = TaukError(issue: issue, testMethodName: formatTestMethodName(rawNameString: self.name))
+        self.testResult?.log = getLogEntries()
         self.testResult?.screenshot = getScreenshot()
         self.testResult?.viewSource = getViewSource()
         super.record(issue)
@@ -83,6 +94,10 @@ public class TaukXCTestCase: XCTestCase {
         testResult.endTime = ProcessInfo.processInfo.systemUptime
         testResult.callerFilePath = self.callerFilePath
         testResult.deviceInfo.bundleId = self.bundleId
+        
+        if testResult.log == nil {
+            testResult.log = getLogEntries()
+        }
         
         if testResult.screenshot == nil {
             testResult.screenshot = getScreenshot()
@@ -133,10 +148,15 @@ public class TaukXCTestCase: XCTestCase {
     @objc private func handlePipeNotification(notification: Notification) {
         inputPipe.fileHandleForReading.readInBackgroundAndNotify()
         
-        if let data = notification.userInfo?[NSFileHandleNotificationDataItem] as? Data, let logLine = String(data: data, encoding: String.Encoding.ascii) {
+        if let data = notification.userInfo?[NSFileHandleNotificationDataItem] as? Data, let logLine = String(data: data, encoding: String.Encoding.utf8) {
             outputPipe.fileHandleForWriting.write(data)
             
-            // Store logLine in Queue
+            if self.logQueue.count == 100 {
+                self.logQueue.removeFirst(25)
+                self.logQueue.append(LogEntry(date: Date(), message: logLine))
+            } else {
+                self.logQueue.append(LogEntry(date: Date(), message: logLine))
+            }
         }
     }
 }

@@ -27,6 +27,7 @@ struct TestResult {
         return Int((endTime - startTime) * 1000)
     }
     var error: TaukError?
+    var log: [LogEntry]?
     
     init(testName name: String, deviceInfo: DeviceInfo) {
         self.name = name

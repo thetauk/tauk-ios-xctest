@@ -2,9 +2,25 @@ import Foundation
 import XCTest
 import AEXML
 
-// TODO: Get log files
-func getLog() {
-
+struct LogEntry: Codable {
+    var unixTimestamp: String
+    var level: String?
+    var message: String
+    var type: String
+    
+    init(date: Date, message: String, type: String = "XCTest", level: String? = nil) {
+        self.unixTimestamp = String(Int(date.timeIntervalSince1970))
+        self.message = message.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.type = type
+        self.level = level
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case unixTimestamp = "timestamp"
+        case level = "level"
+        case message = "message"
+        case type = "type"
+    }
 }
 
 func formatTestMethodName(rawNameString: String) -> String {
