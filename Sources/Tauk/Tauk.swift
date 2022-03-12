@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 
-public class TaukXCTestCase: XCTestCase {
+open class TaukXCTestCase: XCTestCase {
     private var apiToken: String?
     private var projectId: String?
     private var appUnderTest: XCUIApplication?
