@@ -16,13 +16,13 @@ open class TaukXCTestCase: XCTestCase {
     private var logQueue: [LogEntry] = []
     
     
-    open func taukSetUp(apiToken: String, projectId: String, appUnderTest: XCUIApplication, exclude: Bool? = false, uploadTimeoutMilliseconds: Double? = nil, customTestName: String? = nil, userProvidedBundleId: String? = Bundle.main.bundleIdentifier, callerFilePath: String = #filePath) {
+    open func taukInitialize(apiToken: String, projectId: String, appUnderTest: XCUIApplication, exclude: Bool? = false, uploadTimeoutSeconds: Double? = nil, customTestName: String? = nil, userProvidedBundleId: String? = Bundle.main.bundleIdentifier, callerFilePath: String = #filePath) {
         self.apiToken = apiToken
         self.projectId = projectId
         self.appUnderTest = appUnderTest
         self.customTestName = customTestName
         self.excluded = exclude ?? false
-        self.uploadTimeout = uploadTimeoutMilliseconds ?? 4.0
+        self.uploadTimeout = uploadTimeoutSeconds ?? 4.0 // Default to 4.0 seconds
         self.callerFilePath = callerFilePath
         self.bundleId = userProvidedBundleId
         openConsolePipe()
