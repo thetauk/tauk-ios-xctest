@@ -16,7 +16,7 @@ open class TaukXCTestCase: XCTestCase {
     private var logQueue: [LogEntry] = []
     
     
-    open func taukInitialize(apiToken: String, projectId: String, appUnderTest: XCUIApplication, exclude: Bool? = false, uploadTimeoutSeconds: Double? = nil, customTestName: String? = nil, userProvidedBundleId: String? = Bundle.main.bundleIdentifier, callerFilePath: String = #filePath) {
+    open func taukInitialize(apiToken: String? = ProcessInfo.processInfo.environment["TAUK_API_TOKEN"], projectId: String? = ProcessInfo.processInfo.environment["TAUK_PROJECT_ID"], appUnderTest: XCUIApplication, exclude: Bool? = false, uploadTimeoutSeconds: Double? = nil, customTestName: String? = nil, userProvidedBundleId: String? = Bundle.main.bundleIdentifier, callerFilePath: String = #filePath) {
         self.apiToken = apiToken
         self.projectId = projectId
         self.appUnderTest = appUnderTest
